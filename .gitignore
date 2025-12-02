@@ -1,0 +1,23 @@
+# Node
+node_modules/
+dist/
+.vite/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Data (大檔不要上去)
+data/
+PanTS/data/
+*.nii
+*.nii.gz
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
