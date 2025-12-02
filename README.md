@@ -6,12 +6,10 @@ Backend uses Flask to serve CT volumes, merged labelmaps, and uint8 conversion f
 
 ## Repository Structure
 BodyMaps-PanTS-Search-Viewer/
-│
-├── PanTS-Demo/           # Frontend (React + Vite + Niivue + Cornerstone)
-├── flask-server/         # Backend (Flask API for volumes & labels)
-├── .github/workflows/    # Optional CI configurations
-│
-└── README.md             # This file
+PanTS-Demo/ (Frontend)
+flask-server/ (Backend API)
+.github/workflows/ (GitHub Actions)
+README.md
 
 ## Setup
 ### 1. Backend (Flask)
