@@ -38,7 +38,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             position: relative
         }
@@ -184,17 +184,19 @@
         }
 
         .main {
-            max-width: 1200px;
-            margin: 16px auto;
-            display: grid;
-            gap: 16px
-        }
+    max-width: 1700px;     /* 跟 .container 一樣寬，整塊內容一起對齊 */
+    margin: 24px auto 64px;
+    display: grid;
+    column-gap: 20px;      /* 左右的 gap 小一點，Results 更靠左 */
+    row-gap: 24px;
+}
 
-        @media(min-width:1100px) {
-            .main {
-                grid-template-columns: 300px 1fr
-            }
-        }
+@media (min-width:1100px) {
+    .main {
+        grid-template-columns: 260px minmax(0, 1fr);  /* Advanced 變窄 */
+    }
+}
+
 
         .panel {
             background: var(--panel);
@@ -277,26 +279,23 @@
         }
 
         .recScroll {
-            display: flex;
-            gap: 12px;
-            overflow: auto;
-            padding-bottom: 8px;
-            scroll-snap-type: x mandatory;
-            scrollbar-width: none
-        }
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 0 16px;
+}
 
         .recScroll::-webkit-scrollbar {
-            display: none
-        }
+  display: none;
+}
 
         .recCard {
-            min-width: 320px;
-            scroll-snap-align: start;
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            background: var(--panel);
-            overflow: hidden
-        }
+  flex: 0 0 320px;
+  scroll-snap-align: start;
+}
 
         .recThumb {
             width: 100%;
@@ -1160,6 +1159,63 @@ body.viewer-open .hero {
 }
 .optRow.disabled { opacity: .45; pointer-events: none; }
 .optRow.disabled .count { opacity: .8; }
+
+
+/* 單一卡片：往右微調 */
+#cards.centerOne .card {
+  flex: 0 0 360px;
+  max-width: 360px;
+  width: 100%;
+  padding-left: 0 !important;
+  margin-left: 120px;   /* ✅ 關鍵：控制往右的程度，120px 可再微調 */
+}
+
+/* === Search bar 下拉：各自對齊上方框框 === */
+
+/* ID / Tumor-Sex-Age 這兩個 segment 自己當定位參考 */
+.searchRail > .segment.pop {
+  position: relative;
+}
+
+/* 下拉面板：寬度 = 自己的 segment 寬度，正好貼在下面 */
+.searchRail > .segment.pop .popPanel {
+  top: calc(100% + 6px);   /* 緊貼在該框框下面一點點 */
+  left: 0;
+  right: auto;
+  width: 100% !important;
+  max-width: none;
+  transform: none !important;   /* ← 這行把原本的 translateX(-50%) 拿掉 */
+}
+
+/* 小螢幕時一樣貼齊自己，不會超出畫面 */
+@media (max-width: 600px) {
+  .searchRail > .segment.pop .popPanel {
+    width: 100% !important;
+  }
+}
+ /* 讓 ID 推薦面板跟上面黃框對齊，不要往左凸出去 */
+  #popID {
+    position: relative;
+  }
+
+  #popID .popPanel {
+    left: 42px !important;                    /* 往右移一點點，可視情況改成 6~10px */
+    width: calc(100% - 24px) !important;     /* 左右各留 8px，跟上面輸入框對齊 */
+    max-width: 515px;                        /* 保留原本最大寬度 */
+  }
+
+    /* 讓 Tumor / Sex / Age 的下拉面板跟上面藍色框對齊 */
+  #popSTA {
+    position: relative;
+  }
+
+  #popSTA .popPanel {
+    left: 8px !important;                    /* 往右移一點，可微調 6–10px */
+    width: calc(100% - 16px) !important;     /* 左右各留 8px，內縮與上方輸入框一致 */
+    max-width: none;                         /* 如果你有設 max-width，可視需要保留或移除 */
+  }
+
+
     </style>
 </head>
 
@@ -1172,70 +1228,73 @@ body.viewer-open .hero {
 </button>
 
 <!-- ✅ Search Section -->
-<section class="hero">
-  <div class="container">
-    <div class="searchRail">
-      <!-- ID -->
-      <div class="segment pop" id="popID">
-        <label>ID</label>
-        <div class="inputWrap">
-          <input id="q" class="input popBtn" placeholder="Search Case ID or keyword…" autocomplete="off">
-          <button id="clearBtn" class="clearBtn" title="Clear" aria-label="Clear">×</button>
-        </div>
-
-        <div class="popPanel" style="width:520px">
-          <div class="group">
-            <div class="groupTitle">Recommended IDs</div>
-            <div id="idReco" class="chips"></div>
+<!-- ✅ Search Section -->
+<div class="searchBarWrapper">
+  <section class="hero">
+    <div class="container">
+      <div class="searchRail">
+        <!-- ID -->
+        <div class="segment pop" id="popID">
+          <label>ID</label>
+          <div class="inputWrap">
+            <input id="q" class="input popBtn" placeholder="Search Case ID or keyword…" autocomplete="off">
+            <button id="clearBtn" class="clearBtn" title="Clear" aria-label="Clear">×</button>
           </div>
-          <div class="group">
-            <div class="groupTitle">Recently viewed</div>
-            <div id="idRecent" class="chips">
-              <span class="recMeta">No recent</span>
+
+          <div class="popPanel" style="width:520px">
+            <div class="group">
+              <div class="groupTitle">Recommended IDs</div>
+              <div id="idReco" class="chips"></div>
+            </div>
+            <div class="group">
+              <div class="groupTitle">Recently viewed</div>
+              <div id="idRecent" class="chips">
+                <span class="recMeta">No recent</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
+        <!-- STA -->
+        <div class="segment pop" id="popSTA">
+          <button class="fakeInput popBtn" type="button">
+            <span id="staSummary">Any tumor · Any sex · Any age</span>
+          </button>
 
-      <!-- STA -->
-      <div class="segment pop" id="popSTA">
-        <button class="fakeInput popBtn" type="button">
-          <span id="staSummary">Any tumor · Any sex · Any age</span>
-        </button>
+          <div class="popPanel" style="max-width:560px">
+            <div class="group">
+              <div class="groupTitle">Tumor</div>
+              <div id="tumorChips" class="chips">
+                <button class="chip" data-tumor="">Any</button>
+                <button class="chip flat" data-tumor="1">Tumor</button>
+                <button class="chip flat" data-tumor="0">No tumor</button>
+              </div>
+            </div>
 
-        <div class="popPanel" style="max-width:560px">
-          <div class="group">
-            <div class="groupTitle">Tumor</div>
-            <div id="tumorChips" class="chips">
-              <button class="chip" data-tumor="">Any</button>
-              <button class="chip flat" data-tumor="1">Tumor</button>
-              <button class="chip flat" data-tumor="0">No tumor</button>
+            <div class="group">
+              <div class="groupTitle">Sex <span class="hint">Multi-Select</span></div>
+              <div id="sexChips" class="chipArea flat">
+                <button class="chip" data-sex="">Any</button>
+                <button class="chip" data-sex="M">Male</button>
+                <button class="chip" data-sex="F">Female</button>
+                <button class="chip" data-sex="U">Unknown</button>
+              </div>
+            </div>
+
+            <div class="group">
+              <div class="groupTitle">Age <span class="hint">Multi-Select</span></div>
+              <div id="ageChips" class="chipArea flat"></div>
             </div>
           </div>
+        </div>
 
-          <div class="group">
-            <div class="groupTitle">Sex <span class="hint">Multi-Select</span></div>
-            <div id="sexChips" class="chipArea flat">
-              <button class="chip" data-sex="">Any</button>
-              <button class="chip" data-sex="M">Male</button>
-              <button class="chip" data-sex="F">Female</button>
-              <button class="chip" data-sex="U">Unknown</button>
-            </div>
-          </div>
+        <!-- Search button -->
+        <button id="searchBtn" class="btnSearch" type="button">Search</button>
+      </div> <!-- /.searchRail -->
+    </div>   <!-- /.container -->
+  </section>
+</div> <!-- /.searchBarWrapper -->
 
-          <div class="group">
-            <div class="groupTitle">Age <span class="hint">Multi-Select</span></div>
-            <div id="ageChips" class="chipArea flat"></div>
-          </div>
-        </div> <!-- /popPanel -->
-      </div> <!-- /segment popSTA -->
-
-      <!-- ✅ Search button fixed at right -->
-      <button id="searchBtn" class="btnSearch" type="button">Search</button>
-    </div> <!-- /.searchRail -->
-  </div>
-</section>
 
 <style>
 /* === 修正版 Search Rail 樣式 === */
@@ -1330,6 +1389,77 @@ body.viewer-open .hero {
 }
 .home-btn:hover{ filter: brightness(1.08); }
 .home-btn:active{ transform: translateY(1px); }
+/* =========================================================
+   ❶ Advanced 整欄變窄（從 340–400px → 260px）
+   ========================================================= */
+.main, .content, .twoCols {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr); /* 左 260px、右自動 */
+  gap: 20px;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* Advanced 面板本身寬度 */
+#filters {
+  width: 100%;
+  max-width: 260px;
+}
+
+/* 字體略縮小，讓整欄更緊實 */
+#filters,
+#filters * {
+  font-size: 13px !important;
+}
+
+/* 行距縮小 */
+.fset .optRow {
+  padding: 1px 0;
+}
+
+/* “Show more” 按鈕對齊收窄 */
+.fset .showMore {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+/* =========================================================
+   ❷ Results 往左貼齊（包含 Results Head 與 Sort by）
+   ========================================================= */
+
+/* Results 標題列往左收回 */
+.resultsHead {
+  padding-left: 0 !important;
+}
+
+/* Sort by 下拉選單靠左，與 Results 對齊 */
+.resultsHead select {
+  margin-right: 0 !important;
+}
+
+/* 卡片主體區塊往左貼齊（移除多餘空白） */
+#resultsPanel {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* 卡片容器 grid 左右無額外間距 */
+#cards {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* 如果是單筆 → 不要偏移 */
+#resultsPanel.single {
+  margin-left: 0 !important;
+  width: 100% !important;
+}
+.resultsHead.single {
+  margin-left: 0 !important;
+}
 
 </style>
 <style>
@@ -1338,7 +1468,7 @@ body.viewer-open .hero {
     display: grid;
     grid-template-columns: 380px minmax(0, 1fr); /* 左側 Advanced 380px，可依需要改 */
     gap: 20px; /* 中間距離稍微縮小 */
-    max-width: 100%;
+      max-width: 1600px;
     width: 100%;
     margin: 0 auto;
     padding-left: 20px;   /* 左右外邊界都縮小 */
@@ -1396,7 +1526,7 @@ body.viewer-open .hero {
 }
 
 /* 在較小螢幕下自動收窄左側 Advanced 與右側內容 */
-@media (max-width: 1300px) {
+@media (max-width: 1600px) {
   .main, .content, .twoCols {
     grid-template-columns: 340px minmax(0, 1fr);
     padding-left: 16px;
@@ -1622,6 +1752,224 @@ body.viewer-open .hero {
   color: #ef4444;  /* 紅色 */
 }
 
+
+/* 使整個 search bar 與內容統一最大寬度 */
+.mainContainer,
+.searchBarWrapper,
+.resultsHead,
+#resultsPanel,
+#recBar {
+  max-width: 1800px;   /* 你可以改成 1500 / 1700 / 1800 */
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+/* 搜尋欄黃色框外層 */
+.searchBarWrapper {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* Browse 區塊統一寬度 */
+#recBar {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* Results 卡片區塊統一左右間距 */
+#resultsPanel {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+</style>
+<style>
+  /* === 統一版面寬度 === */
+  .hero .container,
+  section.main {
+    max-width: 1350px;      /* 搜尋列、Advanced、Results 一樣寬 */
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* 左側 Advanced + 右側 Results 的 grid */
+  section.main {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr); /* 左 280px、右吃滿 */
+    column-gap: 24px;
+    align-items: flex-start;
+  }
+
+  /* Advanced 不要再另外往右推 */
+  #filters {
+    width: 100%;
+    max-width: 280px;
+    margin-left: -12px !important;
+  }
+
+
+
+  /* Results 不要再整欄 margin-left */
+  #resultsPanel {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100%;
+  }
+
+  /* Results 標題列（Results: / sort by）左右貼齊容器 */
+  .resultsHead {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+</style>
+<style>
+  /* 卡片 grid：桌機 3 欄，自動縮成 2 / 1 欄 */
+  #cards {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(300px, 1fr));
+    gap: 24px;               /* 卡片彼此間距 */
+    padding: 16px 0 24px !important;
+  }
+
+  /* 1200px 以下：2 欄 */
+  @media (max-width: 1200px) {
+    #cards {
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 20px;
+    }
+  }
+
+  /* 768px 以下：1 欄 */
+  @media (max-width: 768px) {
+    #cards {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+
+  /* 卡片本身不要再被限制得太窄 */
+  #cards .card,
+  #cards .caseCard {
+    max-width: none !important;
+    width: 100%;
+  }
+
+  /* 縮圖高度統一，大一點比較好看 */
+  #cards .card .thumb,
+  #cards .caseCard img {
+    height: 260px !important;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  /* 單筆結果時，不要再亂偏移，保持置中 */
+  #resultsPanel.single {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  #cards.centerOne {
+    justify-content: center;
+    padding-left: 0 !important;
+  }
+  #cards.centerOne .card {
+    flex: 0 0 340px;
+    max-width: 340px;
+  }
+
+/* === Advanced 側欄：排版最終版 === */
+
+/* 每一列：checkbox + 文字 + 數字，排成一行 */
+#filters .optRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* label 只包 checkbox + 文字，不要撐到整行 */
+#filters .optRow label {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 4px;
+}
+
+/* checkbox 小間距 */
+#filters .optRow input[type="checkbox"] {
+  margin-right: 6px;
+}
+
+/* 數字就是跟在 label 後面，不往右推，也不要換行 */
+#filters .optRow > span,
+#filters .optRow > .count,
+#filters .optRow > .num {
+  white-space: nowrap;      /* 不拆行 */
+  margin-left: 4px;
+  margin-right: 0;
+  text-align: left;
+}
+
+/* 保險：清掉可能殘留的 float */
+#filters .optRow > * {
+  float: none !important;
+}
+
+</style>
+
+<style>
+  /* 修正 Advanced 欄位被撐太寬導致數字被蓋住的問題 */
+  #filters,
+  .filters {
+    width: 100%;
+    max-width: 280px;       /* 你希望的 Advanced 寬度，可改 260/300 */
+    min-width: 0 !important;/* 把之前 min-width:340px 強制關掉 */
+    box-sizing: border-box;
+  }
+
+ /* === 統一版面寬度 === */
+.hero .container,
+section.main,
+section#recBar {           /* ⭐ 把 Browse 也拉進來一起對齊 */
+  max-width: 1350px;      /* 搜尋列、Browse、Advanced、Results 一樣寬 */
+  margin: 0 auto;
+  padding: 0 24px;
+}
+</style>
+
+<style>
+  /* 單一結果版：不要橫向偏移，卡片置中即可 */
+
+  /* Results 標題列正常靠左，不再整欄位移 */
+  .resultsHead.single {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    width: 100% !important;
+  }
+
+  /* 右側結果容器不要再被推開，吃滿右邊欄位 */
+  #resultsPanel.single {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* 卡片容器：改用 flex 置中，而不是整欄往右推 */
+  #cards.centerOne {
+    display: flex !important;
+    justify-content: center !important;   /* 如果想靠左改成 flex-start */
+    align-items: flex-start;
+    gap: 24px;
+    padding-left: 0 !important;
+  }
+
+  /* 單一卡片的寬度（可依你喜好微調） */
+  #cards.centerOne .card {
+    flex: 0 0 360px;
+    max-width: 360px;
+    width: 100%;
+    padding-left: 0 !important;
+  }
 </style>
 
 
